@@ -47,7 +47,7 @@ function main() {
   }
 
   let counter = 0;
-  Promise.resolve(Promise.map(promises, result => {
+  Promise.resolve(Promise.mapSeries(promises, result => {
     const votes = result.body.numVotes;
     if (votes > VOTE_LIMIT) {
       console.log(`Reached ${votes} votes. Exiting.`);
@@ -55,8 +55,7 @@ function main() {
     }
     console.log(`Voted ${++counter} times this session.`);
     console.log(`Voted ${votes} times total.`);
-  }, {
-    concurrency: 1
+    return Promise.delay(1000);
   })).catch(e => {
     console.error(e);
   }).then(() => {
@@ -64,4 +63,19 @@ function main() {
   });
 }
 
-main();
+function mainV2() {
+  let counter = 0;
+  setInterval(() => {
+    genVote().then((result) => {
+      const votes = result.body.numVotes;
+      if (votes > VOTE_LIMIT) {
+        console.log(`Reached ${votes} votes. Exiting.`);
+        process.exit(0);
+      }
+      console.log(`Voted ${++counter} times this session.`);
+      console.log(`Voted ${votes} times total.`);
+    });
+  }, 1000);
+}
+
+mainV2();
