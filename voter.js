@@ -41,41 +41,17 @@ function genVote() {
 }
 
 function main() {
-  const promises = [];
-  for (let i = 0; i < VOTE_LIMIT; i++) {
-    promises.push(genVote());
-  }
-
-  let counter = 0;
-  Promise.resolve(Promise.mapSeries(promises, result => {
-    const votes = result.body.numVotes;
-    if (votes > VOTE_LIMIT) {
-      console.log(`Reached ${votes} votes. Exiting.`);
-      process.exit(0);
-    }
-    console.log(`Voted ${++counter} times this session.`);
-    console.log(`Voted ${votes} times total.`);
-    return Promise.delay(1000);
-  })).catch(e => {
-    console.error(e);
-  }).then(() => {
-    process.exit(0);
-  });
-}
-
-function mainV2() {
   let counter = 0;
   setInterval(() => {
     genVote().then((result) => {
       const votes = result.body.numVotes;
+      process.stdout.write(`Voted ${++counter} times this session, there are ${votes} total votes.\r`);
       if (votes > VOTE_LIMIT) {
         console.log(`Reached ${votes} votes. Exiting.`);
         process.exit(0);
       }
-      console.log(`Voted ${++counter} times this session.`);
-      console.log(`Voted ${votes} times total.`);
     });
   }, 1000);
 }
 
-mainV2();
+main();
